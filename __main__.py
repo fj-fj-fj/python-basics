@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-"""This module includes finding the shortest path."""
+"""This module includes finding the shortest path.
+
+Check:
+`curl -fsSL https://raw.githubusercontent.com/fj-fj-fj/python-basics/main/__main__.py | python3 -`
+
+"""
 import math
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TypeVar, Tuple, Union
