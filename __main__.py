@@ -57,7 +57,11 @@ class Route:
 
     """Class for representing a shortest distance."""
 
-    def __init__(self: _TRoute, console_log: bool = False):
+    def __init__(
+        self: _TRoute,
+        console_log: bool = False,
+        start: str = "почтовое отделение"
+    ):
         """Initialize Route."""
         # Print intermediate data.
         # self._print()
@@ -65,15 +69,18 @@ class Route:
         # Validated data to create a list of `Point`.
         # '__main__'.main.InputValidator.Postman.all_route()
         self.validated: Optional[InputValidator] = None
-        # List of all points.
+        # Start address.
         # self.handle._set_preroute()
-        self._row_route: List[Optional[Point]] = []
+        self._start_address = start
         # Start point.
         # self.handle._set_preroute()
         self._start_point: Optional[Point] = None
         # Finish point.
         # self.handle._set_preroute()
         self._finish_point: Optional[Point] = None
+        # List of points without start and finish.
+        # self.handle._set_preroute()
+        self._row_route: List[Optional[Point]] = []
         # Distance matrix between points.
         # self.handle._calculate_minimal_route._generate_matrix()
         self._all_distances: Optional[Dict[str, Dict[str, float]]] = []
@@ -114,10 +121,12 @@ class Route:
 
     def _set_preroute(self: _TRoute):
         """Set a list of waypoints."""
-        self._start_point: Point = Point(*self.validated.data[0])
-        self._finish_point: Point = Point(*self.validated.data[0])
-        for point in self.validated.data[1:]:
-            self._row_route.append(Point(*point))
+        for point in self.validated.data:
+            if point[-1].lower() == self._start_address:
+                self._start_point = Point(*point)
+            else:
+                self._row_route.append(Point(*point))
+        self._finish_point = self._start_point
 
     def _calculate_minimal_route(self: _TRoute):
         """Calculate a valid possible route."""
@@ -132,7 +141,6 @@ class Route:
         mininal_distance: float = math.inf
         minimal_path: List[str] = []
         start_point: str = self._start_point.address
-
         for path in self._paths:
             path: List[str]
             route_dist = .0
@@ -143,7 +151,7 @@ class Route:
                 mininal_distance = route_dist
                 minimal_path = path
 
-        mininal_route: list = []
+        mininal_route: List[Optional[Point]] = []
         for point_address in minimal_path:
             mininal_route.append(_get_point_by_address(point_address))
 
@@ -212,6 +220,15 @@ class Route:
         _permute(points_address, len(points_address))
 
 
+def main(data: Any) -> str:
+    """Init Postman and return the shortest route or raise Error."""
+    validated: InputValidator = InputValidator(data) # or raise Error !
+    route: Route = Route()
+    route.validated = validated
+    result: str = route.shortify().display
+    return result
+
+
 class Postman:
 
     """Class for representing a postman."""
@@ -247,15 +264,30 @@ def main(data: Any) -> str:
 
 
 if __name__ == "__main__":
-    data: List[Tuple[int, int, str]]
-    data = [
-        (0, 2, "Почтовое отделение"),
-        (2, 5, "Ул. Грибоедова, 104/25"),
-        (5, 2, "Ул. Бейкер стрит, 221б"),
-        (6, 6, "Ул. Большая Садовая, 302-бис"),
-        (8, 3, "Вечнозелёная Аллея, 742")
+    data: List[List[Tuple[int, int, str]]]
+    data_set = [
+        [
+            (0, 2, "Почтовое отделение"),
+            (8, 3, "Вечнозелёная Аллея, 742"),
+            (6, 6, "Ул. Большая Садовая, 302-бис"),
+            (5, 2, "Ул. Бейкер стрит, 221б"),
+            (2, 5, "Ул. Грибоедова, 104/25"),
+        ],
+        [
+            (2, 5, "Ул. Грибоедова, 104/25"),
+            (5, 2, "Ул. Бейкер стрит, 221б"),
+            (6, 6, "Ул. Большая Садовая, 302-бис"),
+            (8, 3, "Вечнозелёная Аллея, 742"),
+            (0, 2, "Почтовое отделение"),
+        ],
+        [
+            (8, 3, "Вечнозелёная Аллея, 742"),
+            (6, 6, "Ул. Большая Садовая, 302-бис"),
+            (0, 2, "Почтовое отделение"),
+            (5, 2, "Ул. Бейкер стрит, 221б"),
+            (2, 5, "Ул. Грибоедова, 104/25"),
+        ]
     ]
-    result: str = main(data)
 
     expected = (
         "(0, 2) -> (5, 2)[5.0] -> "
@@ -264,7 +296,7 @@ if __name__ == "__main__":
         "(2, 5)[15.890934561250031] -> "
         "(0, 2)[19.49648583671402] = 19.49648583671402"
     )
-    assert result == expected
-    print(result)
 
-# Thanks =)
+    for data in data_set:
+        result: str = main(data)
+        assert result == expected
