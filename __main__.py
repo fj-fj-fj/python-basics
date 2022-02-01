@@ -11,10 +11,7 @@ from typing import Any, Dict, List, Optional, TypeVar, Tuple, Union
 
 
 _TInputValidator = TypeVar("_TInputValidator", bound="InputValidator")
-_TPoint = TypeVar("_TPoint", bound="Point")
 _TRoute = TypeVar("_TRoute", bound="Route")
-_TPostman = TypeVar("_TPostman", bound="Postman")
-
 
 @dataclass(frozen=True)
 class InputValidator:
@@ -36,7 +33,6 @@ class InputValidator:
         except AssertionError:
             raise TypeError(f"The field 'data' must be "
                 f"`{self.__annotations__['data']}`")
-    #     # else: Check is passed successfully.
 
 
 @dataclass(frozen=True)
@@ -48,47 +44,20 @@ class Point:
     y: int
     address: str
 
-    def __str__(self: _TPoint) -> str:
-        """Represent as Point(x=<int> y=<int>)."""
-        return f"{type(self).__name__}(x={self.x!r}, y={self.y!r})"
-
 
 class Route:
 
     """Class for representing a shortest distance."""
 
-    def __init__(
-        self: _TRoute,
-        console_log: bool = False,
-        start: str = "почтовое отделение"
-    ):
+    def __init__(self: _TRoute, start: str = "почтовое отделение"):
         """Initialize Route."""
-        # Print intermediate data.
-        # self._print()
-        self._console_log = console_log
-        # Validated data to create a list of `Point`.
-        # '__main__'.main.InputValidator.Postman.all_route()
         self.validated: Optional[InputValidator] = None
-        # Start address.
-        # self.handle._set_preroute()
         self._start_address = start
-        # Start point.
-        # self.handle._set_preroute()
         self._start_point: Optional[Point] = None
-        # Finish point.
-        # self.handle._set_preroute()
         self._finish_point: Optional[Point] = None
-        # List of points without start and finish.
-        # self.handle._set_preroute()
         self._row_route: List[Optional[Point]] = []
-        # Distance matrix between points.
-        # self.handle._calculate_minimal_route._generate_matrix()
         self._all_distances: Optional[Dict[str, Dict[str, float]]] = []
-        # List of all possible routes.
-        # self.handle._calculated_minimal_route._create_all_combinations()
         self._paths: List[Optional[str]] = []
-        # The path with the shortest route length.
-        # self.handle._calculated_minimal_route()
         self._display: Optional[str] = None
 
     def shortify(self: _TRoute) -> _TRoute:
@@ -114,10 +83,6 @@ class Route:
         min_path = f"{route}({start_point.x}, {start_point.y})[{min_distance}]"
         result = f"{min_path} = {min_distance}"
         return result
-
-    def _print(self: _TRoute, *args: Any, **kwargs: Any):
-        """Debug or not."""
-        self._console_log and print(*args, **kwargs, end='\n\n')
 
     def _set_preroute(self: _TRoute):
         """Set a list of waypoints."""
@@ -221,45 +186,11 @@ class Route:
 
 
 def main(data: Any) -> str:
-    """Init Postman and return the shortest route or raise Error."""
+    """Validate data an return the shortest route or raise Error."""
     validated: InputValidator = InputValidator(data) # or raise Error !
     route: Route = Route()
     route.validated = validated
     result: str = route.shortify().display
-    return result
-
-
-class Postman:
-
-    """Class for representing a postman."""
-
-    def __init__(self: _TPostman):
-        """Initialize Postman with Distance."""
-        self.make_route: Route = Route()
-        self.route: Optional[InputValidator] = None
-
-    def __repr__(self: _TPostman) -> str:
-        """Represent as Postman(route=<InputValidator>)."""
-        return f"{type(self).__name__}(route={self.route!r})"
-
-    def add_route(self: _TPostman, new_route: InputValidator) -> _TPostman:
-        """Add new route into Distance."""
-        self.make_route.validated = new_route
-        self.route = new_route
-        return self
-
-    def handle(self: _TPostman) -> str:
-        """Return the path with the shortest route length."""
-        self.add_route(self.route)
-        return self.make_route.shortify().display
-
-
-def main(data: Any) -> str:
-    """Init Postman and return the shortest route or raise Error."""
-    validated: InputValidator = InputValidator(data) # or raise Error !
-    postman: Postman = Postman()
-    postman.add_route(validated)
-    result: str = postman.make_route.shortify().display
     return result
 
 
